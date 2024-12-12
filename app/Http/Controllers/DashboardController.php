@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Notifications\BalanceIsLow;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class DashboardController
 {
@@ -15,6 +17,10 @@ class DashboardController
 
         $transactions = $wallet->transactions()->with('transfer')->orderByDesc('id')->get();
         $balance = $user->wallet->balance;
+
+        if ($balance < 1000) {
+            Notification::sendNow($user, new BalanceIsLow($wallet));
+        }
 
         return view('dashboard', compact('transactions', 'balance'));
     }
